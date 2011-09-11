@@ -1,34 +1,95 @@
+clip = (value) ->
+  if value > 1
+    1
+  if value < -1
+    -1
+  value
+
 class Synthesizer
   constructor: ->
-    @sampleRate = 44100
-    @delayLine  = new Array 100
-
-    AudioContext = webkitAudioContext
+    AudioContext = webkitAudioContext # TODO: Add other browser if supported
 
     @context = new AudioContext
-    @node    = @context.createJavaScriptNode 4096 # what do they mean?
+    @node    = @context.createJavaScriptNode 512 # what do they mean?
 
-    phaseL = 0.0
-    phaseR = 0.0
+    @strings = for i in [0..88]
+      new Synthesizer.String i
+
     @node.onaudioprocess = (event) =>
-      inputArrayL  = event.inputBuffer.getChannelData 0
-      inputArrayR  = event.inputBuffer.getChannelData 1
+      # Buffers
       outputArrayL = event.outputBuffer.getChannelData 0
       outputArrayR = event.outputBuffer.getChannelData 1
 
-      n = inputArrayL.length
+      for frame in [0..outputArrayL.length]
+        channels = [0, 0]
 
-      for i in [0...n]
-        sampleL = Math.sin phaseL
-        sampleR = Math.sin phaseR
+        for string in @strings
+          sample = string.process()
 
-        phaseL += TWO_PI * 440.0 / @sampleRate
-        phaseR += TWO_PI * 440.0 / @sampleRate
+          # sum
+          channels[0] += sample / 8
+          channels[1] += sample / 8
 
-        phaseL -= TWO_PI if phaseL > TWO_PI
-        phaseR -= TWO_PI if phaseR > TWO_PI
+        # Clip again
+        channels[0] =  clip channels[0]
+        channels[1] =  clip channels[1]
 
-        outputArrayL[i] = sampleL
-        outputArrayR[i] = sampleR
+        outputArrayL[frame] = channels[0]
+        outputArrayR[frame] = channels[1]
 
     @node.connect @context.destination
+
+class Synthesizer.Lowpass
+  constructor: (gain = 0.995) ->
+    @gain     = gain / 2
+    @previous = 0
+
+  apply: (sample) ->
+    result    = @gain * (sample + @previous)
+    @previous = sample
+
+    result
+
+class Synthesizer.String
+  constructor: (pitch, samplerate = 44100) ->
+    # Determine the desired fundamental frequency of the string.
+    # Assuming equal temper, concert pitch of 440 Hz.
+    Hz = 55.0 * Math.pow(2, pitch / 12)
+
+    # Since we know the samplerate, we can calculate the desired closed-
+    # loop-length.
+    loopLength = samplerate / Hz
+
+    # But, since we've alrady got half a sample delay from the fixed
+    # lowpass filter, we can already subtract a half a sample.
+    loopLength -= 0.5
+    @L = Math.floor loopLength
+
+    maxlength = 1
+    maxlength <<= 1 while maxlength <= @L
+
+    @delayline = new Array maxlength # TODO: use typed array if available
+    @delayline[i] = 0 for i in [0..maxlength]
+
+    @mask    = maxlength - 1
+    @pluck   = 0
+    @n       = 0
+    @lowpass = new Synthesizer.Lowpass
+
+  process: ->
+    sample = 0
+
+    # ## Excitation
+    sample += clip Math.random() if --@pluck > 0
+
+    # ## Karplus-Strong
+    # Add output from L samples ago.
+    sample += @delayline[(@n - @L) & @mask]
+    # clip
+    sample = clip sample
+    # apply low pass filter
+    sample = @lowpass.apply sample
+    # feed back into delay line
+    @delayline[@n++ & @mask] = sample
+
+    sample
