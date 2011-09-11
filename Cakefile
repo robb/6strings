@@ -10,7 +10,7 @@ buildFiles = [
 ]
 
 libFiles = [
-  'zepto'
+  'jquery-1.6.3.min'
 ]
 
 createDirs = ->
