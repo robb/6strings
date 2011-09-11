@@ -12,7 +12,7 @@ class Synthesizer
     @context = new AudioContext
     @node    = @context.createJavaScriptNode 512 # what do they mean?
 
-    @strings = for i in [0..88]
+    @strings = for i in [0..6]
       new Synthesizer.String i
 
     @node.onaudioprocess = (event) =>
@@ -51,14 +51,21 @@ class Synthesizer.Lowpass
     result
 
 class Synthesizer.String
-  constructor: (pitch, samplerate = 44100) ->
+  constructor: (pitch, @samplerate = 44100) ->
+    @setPitch pitch
+
+    @pluck   = 0
+    @n       = 0
+    @lowpass = new Synthesizer.Lowpass
+
+  setPitch: (pitch) ->
     # Determine the desired fundamental frequency of the string.
     # Assuming equal temper, concert pitch of 440 Hz.
     Hz = 55.0 * Math.pow(2, pitch / 12)
 
     # Since we know the samplerate, we can calculate the desired closed-
     # loop-length.
-    loopLength = samplerate / Hz
+    loopLength = @samplerate / Hz
 
     # But, since we've alrady got half a sample delay from the fixed
     # lowpass filter, we can already subtract a half a sample.
@@ -68,13 +75,12 @@ class Synthesizer.String
     maxlength = 1
     maxlength <<= 1 while maxlength <= @L
 
-    @delayline = new Array maxlength # TODO: use typed array if available
-    @delayline[i] = 0 for i in [0..maxlength]
+    unless @delayline
+      # TODO: use typed array if available
+      @delayline    = new Array maxlength
+      @delayline[i] = 0 for i in [0..maxlength]
 
     @mask    = maxlength - 1
-    @pluck   = 0
-    @n       = 0
-    @lowpass = new Synthesizer.Lowpass
 
   process: ->
     sample = 0
