@@ -1,11 +1,11 @@
 $ ->
-  synth = new Synthesizer
+  window.synth = new Synthesizer
 
   #Standart tuning
   Tuning = [36, 31, 27, 22, 17, 12]
 
   Chords = [
-    ['G' , 1, 0, 0, 0, 2, 3],
+    ['G' , 3, 0, 0, 0, 2, 3],
     ['Em', 0, 0, 0, 2, 2, 0],
     ['C' , 0, 1, 0, 2, 3, 0],
     ['Am', 0, 1, 2, 2, 0, 0],

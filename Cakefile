@@ -5,6 +5,9 @@ fs     = require 'fs'
 
 buildFiles = [
   'Constants',
+  'Filter',
+  'Lowpass',
+  'ThreeBandEqualizer',
   'Synthesizer',
   'Main'
 ]
