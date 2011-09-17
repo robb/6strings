@@ -44,6 +44,9 @@ logCoffeeScriptError = (err, input) ->
       console.log addPadding(lineNumber + offset, 4) + ' ' +
                   lines[lineNumber + offset]
 
+copyImages = ->
+  exec 'cp src/img/* bin/img/'
+
 compileHaml = ->
   exec 'haml src/index.haml bin/index.html', (err) ->
     util.log err if err?
@@ -84,6 +87,7 @@ compileCoffeeScript = (debug = no, minify = no) ->
 
 task 'build', ->
   createDirs()
+  copyImages()
   compileHaml()
   compileSass()
   compileCoffeeScript yes, no
