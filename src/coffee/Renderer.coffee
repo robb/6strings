@@ -1,22 +1,42 @@
 class Renderer
-  constructor: (synthesizer, onload) ->
+  constructor: (@synthesizer, onload) ->
+    @fretWidth = 120
+
     @canvas  = document.getElementById 'main-canvas'
     @canvas.width  = $(window).width()
     @canvas.height = 200
     @context = @canvas.getContext '2d'
 
-    @initialize()
+    @createDrawingContexts()
 
-    $(window).bind 'resize', =>
-      @resizeCanvas()
+    # Load fret graphic
+    @fret = new Image
+    @fret.onload = =>
 
-  initialize: ->
+      lastResized = 0
+      $(window).bind 'resize', =>
+          @resizeCanvas()
+
+      onload?()
+
+    @fret.src = '../img/fret.png'
+
+  createDrawingContexts: ->
+    createCanvasAndContext = (width, height) =>
+      canvas = document.createElement 'canvas'
+      canvas.width  = width  or @canvas.width
+      canvas.height = height or @canvas.height
+      context = canvas.getContext '2d'
+
+      [canvas, context]
+
+    # Create a layer for the frets and one for the strings
+    [@fretsLayer,   @fretsLayerContext]   = createCanvasAndContext()
+    [@stringsLayer, @stringsLayerContext] = createCanvasAndContext()
+
     # Prepare textures for the light (topmost two)
     # and heavy (remaining) strings.
-    @lightTexture = document.createElement 'canvas'
-    @lightTexture.width  = @canvas.width
-    @lightTexture.height = @canvas.height
-    lightTextureContext  = @lightTexture.getContext '2d'
+    [@lightTexture, lightTextureContext] = createCanvasAndContext()
 
     # TODO: consider adding some texture here, too
     lightTextureContext.fillStyle = 'DDDDDD'
@@ -24,10 +44,7 @@ class Renderer
 
     # Create a pattern for the heavy strings, consisting of vertical
     # stripes that looks like the wound wire of the string
-    heavyTexturePattern = document.createElement 'canvas'
-    heavyTexturePattern.width  = 2
-    heavyTexturePattern.height = 1
-    heavyTexturePatternContext = heavyTexturePattern.getContext '2d'
+    [heavyTexturePattern, heavyTexturePatternContext] = createCanvasAndContext 2, 1
 
     heavyTexturePatternContext.fillStyle = 'ECECEC'
     heavyTexturePatternContext.fillRect 0, 0, 1, 1
@@ -36,43 +53,49 @@ class Renderer
 
     pattern = heavyTexturePatternContext.createPattern heavyTexturePattern, 'repeat'
 
-    @heavyTexture = document.createElement 'canvas'
-    @heavyTexture.width  = @canvas.width
-    @heavyTexture.height = @canvas.height
-    heavyTextureContext  = @heavyTexture.getContext '2d'
+    # Create heavy texture with that pattern
+    [@heavyTexture, heavyTextureContext] = createCanvasAndContext()
 
     heavyTextureContext.fillStyle = pattern
     heavyTextureContext.fillRect 0, 0, @heavyTexture.width, @heavyTexture.height
 
-    # Prepare layers for the light and heavy strings
-    @lightLayer = document.createElement 'canvas'
-    @lightLayer.width  = @canvas.width
-    @lightLayer.height = @canvas.height
-    @lightLayerContext = @lightLayer.getContext '2d'
-
-    @heavyLayer = document.createElement 'canvas'
-    @heavyLayer.width  = @canvas.width
-    @heavyLayer.height = @canvas.height
-    @heavyLayerContext = @heavyLayer.getContext '2d'
+    # Prepare sub-layers for the light and heavy strings
+    [@lightLayer, @lightLayerContext] = createCanvasAndContext()
+    [@heavyLayer, @heavyLayerContext] = createCanvasAndContext()
 
   resizeCanvas: ->
     @canvas.width = $(window).width()
-    @initialize()
+    @createDrawingContexts()
     @draw()
 
-  clear: ->
+  draw: ->
+    @drawFrets()
+    @drawStrings()
+
     @context.clearRect 0, 0, @canvas.width, @canvas.height
+    @context.drawImage @fretsLayer,   0, 0, @canvas.width, @canvas.height
+    @context.drawImage @stringsLayer, 0, 0, @canvas.width, @canvas.height
+
+  drawFrets: ->
+    @fretsLayerContext.clearRect 0, 0, @fretsLayer.width, @fretsLayer.height
+
+    # TODO: Consider uneven i.e. realistic spacing between frets
+    x = @fretWidth
+    while x < @fretsLayer.width
+      @fretsLayerContext.drawImage @fret, x, 0, @fret.width, @fret.height
+      x += @fretWidth
+
+  drawStrings: ->
+    # Clear all layers we'll need
+    @stringsLayerContext.clearRect 0, 0, @stringsLayer.width, @stringsLayer.height
     @lightLayerContext.clearRect 0, 0, @lightLayer.width, @lightLayer.height
     @heavyLayerContext.clearRect 0, 0, @heavyLayer.width, @heavyLayer.height
-
-  draw: ->
-    console.time "draw" if DEBUG
-    @clear()
 
     @lightLayerContext.globalCompositeOperation = 'source-over'
     @heavyLayerContext.globalCompositeOperation = 'source-over'
 
     for string in [0..6]
+
       y = 20 + string * (@canvas.height - 40) / 5
 
       context = if string < 2 then @lightLayerContext else @heavyLayerContext
@@ -97,6 +120,7 @@ class Renderer
     @heavyLayerContext.globalCompositeOperation = 'darker'
 
     for string in [0..6]
+
       y = 20 + string * (@canvas.height - 40) / 5
 
       context = if string < 2 then @lightLayerContext else @heavyLayerContext
@@ -117,8 +141,6 @@ class Renderer
       context.closePath()
       context.stroke()
 
-    @context.globalCompositeOperation = 'source-over'
-    @context.drawImage @lightLayer, 0, 0, @canvas.width, @canvas.height
-    @context.drawImage @heavyLayer, 0, 0, @canvas.width, @canvas.height
-
-    console.timeEnd "draw" if DEBUG
+    @stringsLayerContext.globalCompositeOperation = 'source-over'
+    @stringsLayerContext.drawImage @lightLayer, 0, 0, @stringsLayer.width, @stringsLayer.height
+    @stringsLayerContext.drawImage @heavyLayer, 0, 0, @stringsLayer.width, @stringsLayer.height
