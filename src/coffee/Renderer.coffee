@@ -9,6 +9,8 @@ class Renderer
 
     @createDrawingContexts()
 
+    @oscillation = new Array 6
+
     # Load fret graphic
     @fret = new Image
     @fret.onload = =>
@@ -95,12 +97,11 @@ class Renderer
     @heavyLayerContext.globalCompositeOperation = 'source-over'
 
     for string in [0..6]
-
-      y = 20 + string * (@canvas.height - 40) / 5
+      y = 20.5 + string * (@canvas.height - 40) / 5
 
       context = if string < 2 then @lightLayerContext else @heavyLayerContext
 
-      stringWidth = 2 + string * 0.4
+      stringWidth = 2 + string * 0.4 + @oscillation[string]
 
       context.strokeStyle = 'black'
       context.lineWidth = stringWidth
@@ -120,8 +121,9 @@ class Renderer
     @heavyLayerContext.globalCompositeOperation = 'darker'
 
     for string in [0..6]
+      break if @oscillation[string] > 0
 
-      y = 20 + string * (@canvas.height - 40) / 5
+      y = 20.5 + string * (@canvas.height - 40) / 5
 
       context = if string < 2 then @lightLayerContext else @heavyLayerContext
 
@@ -144,3 +146,7 @@ class Renderer
     @stringsLayerContext.globalCompositeOperation = 'source-over'
     @stringsLayerContext.drawImage @lightLayer, 0, 0, @stringsLayer.width, @stringsLayer.height
     @stringsLayerContext.drawImage @heavyLayer, 0, 0, @stringsLayer.width, @stringsLayer.height
+
+    for string in [0..6]
+      @oscillation[string] -= @oscillation[string] / 60
+      @oscillation[string] = 0 if @oscillation[string] < 0.025

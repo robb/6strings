@@ -40,6 +40,8 @@ class Application
             synthesizerString.setPitch pitch
             synthesizerString.pluck = synthesizerString.L / 3
 
+            @renderer.oscillation[string] = 2 + string*string / 6
+
       # Set up rendering loop
       drawingLoop = =>
         @renderer.draw()
