@@ -49,3 +49,16 @@ class Application
         setTimeout drawingLoop, 1000 / 25
 
       drawingLoop()
+
+      # Set up toggle button
+      $('#notes').click =>
+        return if $('#notes').hasClass 'active'
+
+        $('.switch .label').toggleClass 'active'
+        @mode = 'notes'
+
+      $('#chords').click =>
+        return if $('#chords').hasClass 'active'
+
+        $('.switch .label').toggleClass 'active'
+        @mode = 'chords'

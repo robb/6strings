@@ -2,7 +2,7 @@
 
 body
   background: url('../img/wood3.png'),  url('../img/wood2.png'), url('../img/wood1.png')
-  margin: 0
+  font-family: ff-prater-script-web
 
 h1, h2
   font-family: ff-prater-script-web
@@ -21,6 +21,8 @@ h1
 header, section, footer
   padding: 32px
 
+header
+  position: relative
 
 .neck
   $neck-height: 200px
@@ -48,3 +50,48 @@ header, section, footer
     height: $neck-height / 6
     width:  100%
 
+.switch
+  cursor: pointer
+  -webkit-user-select: none
+  -khtml-user-select: none
+  -moz-user-select: none
+  -o-user-select: none
+  user-select: none
+
+  display: inline-block
+
+  span:first-child
+    border-radius: 8px 0 0 8px
+    border-right:  none
+
+  span:last-child
+    border-radius: 0 8px 8px 0
+
+  span
+    float:  left
+    min-width: 40px
+
+    margin: 0
+    padding:  6px 12px 6px 12px
+
+    text-align: center
+    border: 1px solid rgba(60, 23, 15, 0.8)
+    font-size: 14px
+
+    color: #EEE
+    text-shadow: 0 1px 1px rgba(10, 10, 10, 0.7)
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 1px rgba(255, 255, 255, 0.4) inset, 0 -1px 1px rgba(25, 25, 25, 0.4) inset
+    background: rgba(168, 103, 40, 0.4)
+
+  span.active
+    padding:  7px 12px 5px 12px
+
+    box-shadow: 0 0px 1px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7) inset
+    background: rgba(40, 13, 15, 0.4)
+
+.switch#notes-or-chords
+  position: absolute
+  top:      50%
+  left:     50%
+
+  margin-left: -67px
