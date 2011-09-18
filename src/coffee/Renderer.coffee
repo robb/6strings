@@ -96,6 +96,7 @@ class Renderer
     @lightLayerContext.globalCompositeOperation = 'source-over'
     @heavyLayerContext.globalCompositeOperation = 'source-over'
 
+    # Draw strings
     for string in [0..6]
       y = 20.5 + string * (@canvas.height - 40) / 5
 
@@ -120,6 +121,7 @@ class Renderer
     @lightLayerContext.globalCompositeOperation = 'darker'
     @heavyLayerContext.globalCompositeOperation = 'darker'
 
+    # draw shading on strings
     for string in [0..6]
       break if @oscillation[string] > 0
 
@@ -146,6 +148,26 @@ class Renderer
     @stringsLayerContext.globalCompositeOperation = 'source-over'
     @stringsLayerContext.drawImage @lightLayer, 0, 0, @stringsLayer.width, @stringsLayer.height
     @stringsLayerContext.drawImage @heavyLayer, 0, 0, @stringsLayer.width, @stringsLayer.height
+
+    @lightLayerContext.globalCompositeOperation = 'darken'
+    @heavyLayerContext.globalCompositeOperation = 'darken'
+
+    # draw shadow
+    for string in [0..6]
+      y = 20.5 + string * (@canvas.height - 40) / 5
+
+      stringWidth = 2 + string * 0.4
+
+      @stringsLayerContext.shadowColor = '000000'
+      @stringsLayerContext.shadowBlur  = 7
+      @stringsLayerContext.shadowOffsetY = 7
+      @stringsLayerContext.strokeStyle = 'transparent'
+      @stringsLayerContext.lineWidth = stringWidth
+      @stringsLayerContext.beginPath()
+      @stringsLayerContext.moveTo 0, y
+      @stringsLayerContext.lineTo @lightLayer.width, y
+      @stringsLayerContext.closePath()
+      @stringsLayerContext.stroke()
 
     for string in [0..6]
       @oscillation[string] -= @oscillation[string] / 60
