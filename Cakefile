@@ -9,6 +9,8 @@ buildFiles = [
   'Lowpass',
   'ThreeBandEqualizer',
   'Synthesizer',
+  'Renderer',
+  'Application'
   'Main'
 ]
 
