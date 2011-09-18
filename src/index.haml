@@ -1,17 +1,26 @@
 !!!
 %html
   %head
-    %title Karplus-Strong
+    %title 6strin.gs
     %script{:src => './js/application.js', :type => 'text/javascript'}
+    %script{:src => 'http://use.typekit.com/akn6ajq.js', :type => 'text/javascript'}
+    :javascript
+      try{Typekit.load();}catch(e){}
     %link{:rel  => 'stylesheet', :href => './css/application.css'}
 
   %body
-    %h1 Karplus-Strong guitar
+    %header
+      %h1 6strin<span>.</span>gs
 
-    .neck
-      .string
-      .string
-      .string
-      .string
-      .string
-      .string
+    %section.neck
+      .fret
+      .fret
+      .fret
+      .fret
+      .fret
+      .fret
+
+    %section.info
+      %p This tech demo was written by Robert Böhnke
+
+    %footer

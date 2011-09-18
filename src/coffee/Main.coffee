@@ -13,18 +13,18 @@ $ ->
     ['G2' , 2, 2, 3, 4, 4, 2]
   ]
 
-  $('.neck .string').each (i, string) ->
-    for j in [0..6]
+  $('.neck .fret').each (i, fret) ->
+    for j in [0...6]
       do (i, j) ->
-        fret = $('<div class="fret"></div>')
-        fret.mouseenter ->
-          string = synth.strings[i]
-          chord  = Chords[j]
+        string = $('<div class="string"></div>')
+        string.mouseenter ->
+          synthString = synth.strings[j]
+          chord  = Chords[i]
 
           [chordName, notes...] = chord
 
-          string.setPitch notes[i] + Tuning[i]
-          string.pluck = string.L / 3
+          synthString.setPitch notes[j] + Tuning[j]
+          synthString.pluck = synthString.L / 3
 
-        $(string).append fret
+        $(fret).append string
 
