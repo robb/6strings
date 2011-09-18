@@ -84,7 +84,7 @@ class Renderer
     # TODO: Consider uneven i.e. realistic spacing between frets
     x = @fretWidth
     while x < @fretsLayer.width
-      @fretsLayerContext.drawImage @fret, x, 0, @fret.width, @fret.height
+      @fretsLayerContext.drawImage @fret, x, 0, @fret.width, @fretsLayer.height
       x += @fretWidth
 
   drawStrings: ->
