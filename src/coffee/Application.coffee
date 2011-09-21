@@ -16,31 +16,8 @@ class Application
     @renderer    = new Renderer @synthesizer, =>
       @renderer.draw()
 
-      # Set up strumming
-      currentFret   = -1
-      currentString = -1
-      $(@renderer.canvas).bind 'mousemove', (event) =>
-        fret   = Math.floor(event.offsetX / @renderer.fretWidth)
-        string = Math.ceil((event.offsetY - 20) / 32)
-
-        if fret isnt currentFret or string isnt currentString
-          currentFret   = fret
-          currentString = string
-
-          synthesizerString = @synthesizer.strings[string]
-
-          if @mode is 'chords'
-            [name, notes...] = @chords[fret]
-
-            pitch = notes[string] + @tuning[string]
-          else
-            pitch = fret + @tuning[string]
-
-          if pitch
-            synthesizerString.setPitch pitch
-            synthesizerString.pluck = synthesizerString.L / 3
-
-            @renderer.oscillation[string] = 2 + string*string / 6
+      for event in ['mousedown', 'mousemove', 'mouseup']
+        $(@renderer.canvas).bind event, @[event]
 
       # Set up rendering loop
       drawingLoop = =>
@@ -56,9 +33,67 @@ class Application
 
         $('.switch .label').toggleClass 'active'
         @mode = 'notes'
+        @reset()
 
       $('#chords').click =>
         return if $('#chords').hasClass 'active'
 
         $('.switch .label').toggleClass 'active'
         @mode = 'chords'
+        @reset()
+
+  getfretAndString: (event) ->
+    fret   = Math.floor(event.offsetX / @renderer.fretWidth)
+    string = Math.ceil((event.offsetY - 30) / 32)
+
+    [fret, string]
+
+  # Event handlers
+  mousedown: (event) =>
+    @pick event if @mode is 'notes'
+
+  mousemove: (event) =>
+    @strum event if @mode is 'chords'
+
+  mouseup: (event) =>
+    @release event if @mode is 'notes'
+
+  # Actions
+  reset: ->
+    [@currentFret, @currentString] = [null, null]
+
+  strum: (event) ->
+    [fret, string]    = @getfretAndString event
+    synthesizerString = @synthesizer.strings[string]
+
+    if fret isnt @currentFret or string isnt @currentString
+      [@currentFret, @currentString] = [fret, string]
+
+      [name, notes...] = @chords[fret]
+      pitch = notes[string] + @tuning[string]
+
+      synthesizerString.setPitch pitch
+      synthesizerString.pluck = synthesizerString.L / 3
+
+      @renderer.oscillation[string] = 2 + string*string / 6
+
+  pick: (event) ->
+    [@currentFret, @currentString] = [fret, string]
+
+    [fret, string] = @getfretAndString event
+    synthesizerString = @synthesizer.strings[string]
+
+    pitch = fret + @tuning[string]
+
+    synthesizerString.setPitch pitch
+    synthesizerString.pluck = synthesizerString.L / 2
+
+    @renderer.oscillation[string] = 3 + string*string / 6
+
+  release: (event) ->
+    [fret, string] = @getfretAndString event
+    synthesizerString = @synthesizer.strings[string]
+
+    synthesizerString.pluck = 0
+
+    @release
