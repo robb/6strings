@@ -31,14 +31,14 @@ class Application
       $('#notes').click =>
         return if $('#notes').hasClass 'active'
 
-        $('.switch .label').toggleClass 'active'
+        $('#notes-or-chords .label').toggleClass 'active'
         @mode = 'notes'
         @reset()
 
       $('#chords').click =>
         return if $('#chords').hasClass 'active'
 
-        $('.switch .label').toggleClass 'active'
+        $('#notes-or-chords .label').toggleClass 'active'
         @mode = 'chords'
         @reset()
 
