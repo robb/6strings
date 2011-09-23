@@ -91,9 +91,4 @@ class Application
     @renderer.oscillation[string] = 3 + string*string / 6
 
   release: (event) ->
-    [fret, string] = @getfretAndString event
-    synthesizerString = @synthesizer.strings[string]
-
-    synthesizerString.pluck = 0
-
-    @release
+    @reset()
