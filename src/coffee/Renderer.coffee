@@ -1,5 +1,5 @@
 class Renderer
-  constructor: (@synthesizer, onload) ->
+  constructor: (@application, onload) ->
     @fretWidth = 120
 
     @canvas  = document.getElementById 'main-canvas'
@@ -102,14 +102,20 @@ class Renderer
 
       context = if string < 2 then @lightLayerContext else @heavyLayerContext
 
-      stringWidth = 2 + string * 0.4 + @oscillation[string]
+      stringWidth =  2 + string * 0.4
+
+      stringWidth += @oscillation[string] unless string is @application.bendingString
 
       context.strokeStyle = 'black'
       context.lineWidth = stringWidth
       context.beginPath()
-      context.moveTo 0, y
-      context.lineTo @lightLayer.width, y
-      context.closePath()
+      context.moveTo -500, y
+
+      if @application.mode is 'notes' and string is @application.bendingString
+        [bX, bY] = @application.bendingCoordinates
+        context.lineTo bX, bY
+
+      context.lineTo @lightLayer.width + 500, y
       context.stroke()
 
     @lightLayerContext.globalCompositeOperation = 'source-in'
@@ -124,6 +130,9 @@ class Renderer
     # draw shading on strings
     for string in [0..6]
       break if @oscillation[string] > 0
+
+      if @application.mode is 'notes' and string is @application.currentString
+        break
 
       y = 20.5 + string * (@canvas.height - 40) / 5
 
@@ -141,8 +150,8 @@ class Renderer
       context.lineWidth = stringWidth
       context.beginPath()
       context.moveTo 0, y
+
       context.lineTo @lightLayer.width, y
-      context.closePath()
       context.stroke()
 
     @stringsLayerContext.globalCompositeOperation = 'source-over'
@@ -165,6 +174,11 @@ class Renderer
       @stringsLayerContext.lineWidth = stringWidth
       @stringsLayerContext.beginPath()
       @stringsLayerContext.moveTo 0, y
+
+      if @application.mode is 'notes' and string is @application.currentString
+        [bX, bY] = @application.bendingCoordinates
+        @stringsLayerContext.lineTo bX, bY
+
       @stringsLayerContext.lineTo @lightLayer.width, y
       @stringsLayerContext.closePath()
       @stringsLayerContext.stroke()

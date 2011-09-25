@@ -13,11 +13,12 @@ class Application
     ]
 
     @synthesizer = new Synthesizer
-    @renderer    = new Renderer @synthesizer, =>
+    @renderer    = new Renderer @, =>
       @renderer.draw()
 
-      for event in ['mousedown', 'mousemove', 'mouseup']
-        $(@renderer.canvas).bind event, @[event]
+      $('body').bind 'mousedown', @mousedown
+      $('body').bind 'mousemove', @mousemove
+      $('body').bind 'mouseup',   @mouseup
 
       # Set up rendering loop
       drawingLoop = =>
@@ -43,8 +44,14 @@ class Application
         @reset()
 
   getfretAndString: (event) ->
-    fret   = Math.floor(event.offsetX / @renderer.fretWidth)
-    string = Math.ceil((event.offsetY - 30) / 32)
+    x = event.pageX - $('#main-canvas').offset().left
+    y = event.pageY - $('#main-canvas').offset().top
+
+    unless 0 <= y <= @renderer.canvas.height
+      return [null, null]
+
+    fret   = Math.floor(x / @renderer.fretWidth)
+    string = Math.ceil((y - 30) / 32)
 
     [fret, string]
 
@@ -54,6 +61,7 @@ class Application
 
   mousemove: (event) =>
     @strum event if @mode is 'chords'
+    @bend  event if @mode is 'notes'
 
   mouseup: (event) =>
     @release event if @mode is 'notes'
@@ -61,9 +69,15 @@ class Application
   # Actions
   reset: ->
     [@currentFret, @currentString] = [null, null]
+    @bendingString = null
 
   strum: (event) ->
-    [fret, string]    = @getfretAndString event
+    [fret, string] = @getfretAndString event
+    
+    console.log fret, string
+
+    return unless fret? and string?
+
     synthesizerString = @synthesizer.strings[string]
 
     if fret isnt @currentFret or string isnt @currentString
@@ -78,9 +92,11 @@ class Application
       @renderer.oscillation[string] = 2 + string*string / 6
 
   pick: (event) ->
-    [@currentFret, @currentString] = [fret, string]
-
     [fret, string] = @getfretAndString event
+
+    return unless fret? and string?
+
+    [@currentFret, @currentString] = [fret, string]
     synthesizerString = @synthesizer.strings[string]
 
     pitch = fret + @tuning[string]
@@ -89,6 +105,20 @@ class Application
     synthesizerString.pluck = synthesizerString.L / 2
 
     @renderer.oscillation[string] = 3 + string*string / 6
+
+  bend: (event) ->
+    x = event.pageX - $('#main-canvas').offset().left
+    y = event.pageY - $('#main-canvas').offset().top
+
+    @bendingString = @currentString
+    stringPosition = 20.5 + @currentString * (@renderer.canvas.height - 40) / 5
+
+    y = stringPosition - 29 if y < stringPosition - 29
+    y = stringPosition + 29 if y > stringPosition + 29
+    y = 2 if y < 2
+    y = @renderer.canvas.height - 2 if y > @renderer.canvas.height - 2
+
+    @bendingCoordinates = [x, y]
 
   release: (event) ->
     @reset()
