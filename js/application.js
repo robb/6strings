@@ -363,7 +363,7 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
       this.mousemove = __bind(this.mousemove, this);
       this.mousedown = __bind(this.mousedown, this);      this.mode = 'chords';
       this.tuning = [36, 31, 27, 22, 17, 12];
-      this.chords = [['G', 3, 0, 0, 0, 2, 3], ['Em', 0, 0, 0, 2, 2, 0], ['C', 0, 1, 0, 2, 3, 0], ['Am', 0, 1, 2, 2, 0, 0], ['D', 2, 3, 2, 0, 0, 0], ['G2', 2, 2, 3, 4, 4, 2]];
+      this.chords = [['C', 0, 1, 0, 2, 3, 0], ['Am', 0, 1, 2, 2, 0, 0], ['G', 3, 0, 0, 0, 2, 3], ['Em', 0, 0, 0, 2, 2, 0], ['D', 2, 3, 2, 0, 0, 0], ['Bm', 2, 3, 4, 4, 2, 2], ['A', 0, 2, 2, 2, 0, 0], ['F#m', 2, 2, 2, 4, 4, 2], ['E', 0, 0, 1, 2, 2, 0], ['C#m', NaN, 5, 6, 6, 4, NaN], ['B', 2, 2, 4, 4, 4, 2]];
       this.synthesizer = new Synthesizer;
       this.renderer = new Renderer(this, __bind(function() {
         var drawingLoop;
@@ -381,6 +381,7 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
             return;
           }
           $('#notes-or-chords .label').toggleClass('active');
+          $('body').removeClass().addClass('notes');
           this.mode = 'notes';
           return this.reset();
         }, this));
@@ -389,6 +390,7 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
             return;
           }
           $('#notes-or-chords .label').toggleClass('active');
+          $('body').removeClass().addClass('chords');
           this.mode = 'chords';
           return this.reset();
         }, this));
@@ -427,13 +429,14 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
       var synthesizerString, _ref;
       _ref = [null, null], this.currentFret = _ref[0], this.currentString = _ref[1];
       synthesizerString = this.synthesizer.strings[this.bendingString];
-      synthesizerString.setBend(0);
+      if (synthesizerString != null) {
+        synthesizerString.setBend(0);
+      }
       return this.bendingString = null;
     };
     Application.prototype.strum = function(event) {
       var fret, name, notes, pitch, string, synthesizerString, _ref, _ref2, _ref3;
       _ref = this.getfretAndString(event), fret = _ref[0], string = _ref[1];
-      console.log(fret, string);
       if (!((fret != null) && (string != null))) {
         return;
       }
@@ -471,6 +474,7 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
         synthesizerString = this.synthesizer.strings[this.bendingString];
         pitch = fret + this.tuning[this.currentString];
         synthesizerString.setPitch(pitch);
+        this.currentFret = fret;
       }
       if (y < stringPosition - 29) {
         y = stringPosition - 29;
@@ -485,9 +489,9 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
         y = this.renderer.canvas.height - 2;
       }
       this.bendingCoordinates = [x, y];
-      if (this.bendingString != null) {
+      if (this.bendingString) {
         synthesizerString = this.synthesizer.strings[this.bendingString];
-        return synthesizerString.setBend(Math.abs(y - stringPosition) / 29);
+        return synthesizerString != null ? synthesizerString.setBend(Math.abs(y - stringPosition) / 29) : void 0;
       }
     };
     Application.prototype.release = function(event) {
