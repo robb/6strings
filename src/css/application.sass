@@ -12,11 +12,14 @@ body
   -o-user-select: none
   user-select: none
 
-  color: rgba(104, 65, 28, 1)
+  color: rgba(137, 85, 37, 1)
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3)
 
 a
   color: rgba(104, 65, 28, 1)
+
+p
+  line-height: 2 * $base-width
 
 h1, h2
   font-family: ff-prater-script-web
@@ -32,14 +35,16 @@ h1
     margin: 0 -2px 0 -2px
     font-size: 60%
 
-header, section, footer
-  padding: 2 * $base-width
+header
+  padding: (2 * $base-width) $base-width
+
+section, footer
+  padding: $base-width
 
 header
   position: relative
 
 footer
-  color: rgba(137, 85, 37, 1)
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3)
 
 .neck
