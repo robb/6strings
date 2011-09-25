@@ -1,15 +1,163 @@
+/* 
+html5doctor.com Reset Stylesheet
+v1.6.1
+Last Updated: 2010-09-17
+Author: Richard Clark - http://richclarkdesign.com 
+Twitter: @rich_clark
+*/
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent; }
+
+body {
+  line-height: 1; }
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+nav ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+a {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent; }
+
+/* change colours to suit your needs */
+ins {
+  background-color: #ff9;
+  color: #000;
+  text-decoration: none; }
+
+/* change colours to suit your needs */
+mark {
+  background-color: #ff9;
+  color: #000;
+  font-style: italic;
+  font-weight: bold; }
+
+del {
+  text-decoration: line-through; }
+
+abbr[title], dfn[title] {
+  border-bottom: 1px dotted;
+  cursor: help; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+/* change border colour to suit your needs */
+hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid #cccccc;
+  margin: 1em 0;
+  padding: 0; }
+
+input, select {
+  vertical-align: middle; }
+
+body {
+  background: url("../img/wood3.png"), url("../img/wood2.png"), url("../img/wood1.png");
+  font-family: ff-prater-script-web;
+  color: #68411c;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3); }
+
+a {
+  color: #68411c; }
+
+h1, h2 {
+  font-family: ff-prater-script-web;
+  display: inline-block;
+  color: #eeeeee;
+  text-shadow: 1px 1px 2px black; }
+
+h1 {
+  font-size: 55px; }
+  h1 span {
+    display: inline-block;
+    margin: 0 -2px 0 -2px;
+    font-size: 60%; }
+
+header, section, footer {
+  padding: 32px; }
+
+header {
+  position: relative; }
+
+footer {
+  color: #895525;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3); }
+
 .neck {
-  display: table;
+  display: block;
+  padding: 0;
+  height: 200px;
   width: 100%;
-  background: brown; }
+  background: url("../img/neck.png") no-repeat top left;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.6), 0 2px 10px rgba(0, 0, 0, 0.3), 0 -4px 7px rgba(0, 0, 0, 0.3); }
 
-.string {
-  display: table-row;
-  height: 20px; }
+.switch {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  display: inline-block; }
+  .switch span:first-child {
+    border-radius: 8px 0 0 8px;
+    border-right: none; }
+  .switch span:last-child {
+    border-radius: 0 8px 8px 0; }
+  .switch span {
+    float: left;
+    min-width: 40px;
+    margin: 0;
+    padding: 6px 12px 6px 12px;
+    text-align: center;
+    border: 1px solid rgba(60, 23, 15, 0.8);
+    font-size: 14px;
+    color: #eeeeee;
+    text-shadow: 0 1px 1px rgba(10, 10, 10, 0.7);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 1px rgba(255, 255, 255, 0.4) inset, 0 -1px 1px rgba(25, 25, 25, 0.4) inset;
+    background: rgba(168, 103, 40, 0.4); }
+  .switch span.active {
+    padding: 7px 12px 5px 12px;
+    box-shadow: 0 0px 1px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7) inset;
+    background: rgba(40, 13, 15, 0.4); }
 
-.fret {
-  display: table-cell;
-  border-left: 3px solid grey; }
-
-.fret:hover {
-  background: rgba(33, 33, 33, 0.2); }
+.switch#notes-or-chords {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -67px; }
