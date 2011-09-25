@@ -21,7 +21,7 @@ class Renderer
 
       onload?()
 
-    @fret.src = '../img/fret.png'
+    @fret.src = './img/fret.png'
 
   createDrawingContexts: ->
     createCanvasAndContext = (width, height) =>
