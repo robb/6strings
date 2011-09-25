@@ -152,13 +152,25 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
       if (pitch == null) {
         pitch = 12;
       }
-      this.setPitch(pitch);
+      this.pitch = 0;
+      this.bend = 0;
       this.lowpass = new Lowpass;
       this.pluck = 0;
       this.n = 0;
+      this.setPitch(12);
+      this.setBend(0);
     }
     String.prototype.setPitch = function(pitch) {
-      var Hz, i, loopLength, maxlength;
+      this.pitch = pitch;
+      return this.updateFrequency();
+    };
+    String.prototype.setBend = function(bend) {
+      this.bend = bend;
+      return this.updateFrequency();
+    };
+    String.prototype.updateFrequency = function() {
+      var Hz, i, loopLength, maxlength, pitch;
+      pitch = this.pitch + this.bend;
       Hz = 55.0 * Math.pow(2, pitch / 12);
       loopLength = SAMPLE_RATE / Hz;
       loopLength -= 0.5;
@@ -191,8 +203,8 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
     return String;
   })();
   Renderer = (function() {
-    function Renderer(synthesizer, onload) {
-      this.synthesizer = synthesizer;
+    function Renderer(application, onload) {
+      this.application = application;
       this.fretWidth = 120;
       this.canvas = document.getElementById('main-canvas');
       this.canvas.width = $(window).width();
@@ -262,7 +274,7 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
       return _results;
     };
     Renderer.prototype.drawStrings = function() {
-      var context, gradient, string, stringWidth, y, _results;
+      var bX, bY, context, gradient, string, stringWidth, y, _ref, _ref2, _results;
       this.stringsLayerContext.clearRect(0, 0, this.stringsLayer.width, this.stringsLayer.height);
       this.lightLayerContext.clearRect(0, 0, this.lightLayer.width, this.lightLayer.height);
       this.heavyLayerContext.clearRect(0, 0, this.heavyLayer.width, this.heavyLayer.height);
@@ -271,13 +283,19 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
       for (string = 0; string <= 6; string++) {
         y = 20.5 + string * (this.canvas.height - 40) / 5;
         context = string < 2 ? this.lightLayerContext : this.heavyLayerContext;
-        stringWidth = 2 + string * 0.4 + this.oscillation[string];
+        stringWidth = 2 + string * 0.4;
+        if (string !== this.application.bendingString) {
+          stringWidth += this.oscillation[string];
+        }
         context.strokeStyle = 'black';
         context.lineWidth = stringWidth;
         context.beginPath();
-        context.moveTo(0, y);
-        context.lineTo(this.lightLayer.width, y);
-        context.closePath();
+        context.moveTo(-500, y);
+        if (this.application.mode === 'notes' && string === this.application.bendingString) {
+          _ref = this.application.bendingCoordinates, bX = _ref[0], bY = _ref[1];
+          context.lineTo(bX, bY);
+        }
+        context.lineTo(this.lightLayer.width + 500, y);
         context.stroke();
       }
       this.lightLayerContext.globalCompositeOperation = 'source-in';
@@ -288,6 +306,9 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
       this.heavyLayerContext.globalCompositeOperation = 'darker';
       for (string = 0; string <= 6; string++) {
         if (this.oscillation[string] > 0) {
+          break;
+        }
+        if (this.application.mode === 'notes' && string === this.application.currentString) {
           break;
         }
         y = 20.5 + string * (this.canvas.height - 40) / 5;
@@ -302,7 +323,6 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
         context.beginPath();
         context.moveTo(0, y);
         context.lineTo(this.lightLayer.width, y);
-        context.closePath();
         context.stroke();
       }
       this.stringsLayerContext.globalCompositeOperation = 'source-over';
@@ -320,6 +340,10 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
         this.stringsLayerContext.lineWidth = stringWidth;
         this.stringsLayerContext.beginPath();
         this.stringsLayerContext.moveTo(0, y);
+        if (this.application.mode === 'notes' && string === this.application.currentString) {
+          _ref2 = this.application.bendingCoordinates, bX = _ref2[0], bY = _ref2[1];
+          this.stringsLayerContext.lineTo(bX, bY);
+        }
         this.stringsLayerContext.lineTo(this.lightLayer.width, y);
         this.stringsLayerContext.closePath();
         this.stringsLayerContext.stroke();
@@ -341,14 +365,12 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
       this.tuning = [36, 31, 27, 22, 17, 12];
       this.chords = [['G', 3, 0, 0, 0, 2, 3], ['Em', 0, 0, 0, 2, 2, 0], ['C', 0, 1, 0, 2, 3, 0], ['Am', 0, 1, 2, 2, 0, 0], ['D', 2, 3, 2, 0, 0, 0], ['G2', 2, 2, 3, 4, 4, 2]];
       this.synthesizer = new Synthesizer;
-      this.renderer = new Renderer(this.synthesizer, __bind(function() {
-        var drawingLoop, event, _i, _len, _ref;
+      this.renderer = new Renderer(this, __bind(function() {
+        var drawingLoop;
         this.renderer.draw();
-        _ref = ['mousedown', 'mousemove', 'mouseup'];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          event = _ref[_i];
-          $(this.renderer.canvas).bind(event, this[event]);
-        }
+        $('body').bind('mousedown', this.mousedown);
+        $('body').bind('mousemove', this.mousemove);
+        $('body').bind('mouseup', this.mouseup);
         drawingLoop = __bind(function() {
           this.renderer.draw();
           return setTimeout(drawingLoop, 1000 / 25);
@@ -373,9 +395,14 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
       }, this));
     }
     Application.prototype.getfretAndString = function(event) {
-      var fret, string;
-      fret = Math.floor(event.offsetX / this.renderer.fretWidth);
-      string = Math.ceil((event.offsetY - 30) / 32);
+      var fret, string, x, y;
+      x = event.pageX - $('#main-canvas').offset().left;
+      y = event.pageY - $('#main-canvas').offset().top;
+      if (!((0 <= y && y <= this.renderer.canvas.height))) {
+        return [null, null];
+      }
+      fret = Math.floor(x / this.renderer.fretWidth);
+      string = Math.ceil((y - 30) / 32);
       return [fret, string];
     };
     Application.prototype.mousedown = function(event) {
@@ -385,7 +412,10 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
     };
     Application.prototype.mousemove = function(event) {
       if (this.mode === 'chords') {
-        return this.strum(event);
+        this.strum(event);
+      }
+      if (this.mode === 'notes') {
+        return this.bend(event);
       }
     };
     Application.prototype.mouseup = function(event) {
@@ -394,12 +424,19 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
       }
     };
     Application.prototype.reset = function() {
-      var _ref;
-      return _ref = [null, null], this.currentFret = _ref[0], this.currentString = _ref[1], _ref;
+      var synthesizerString, _ref;
+      _ref = [null, null], this.currentFret = _ref[0], this.currentString = _ref[1];
+      synthesizerString = this.synthesizer.strings[this.bendingString];
+      synthesizerString.setBend(0);
+      return this.bendingString = null;
     };
     Application.prototype.strum = function(event) {
       var fret, name, notes, pitch, string, synthesizerString, _ref, _ref2, _ref3;
       _ref = this.getfretAndString(event), fret = _ref[0], string = _ref[1];
+      console.log(fret, string);
+      if (!((fret != null) && (string != null))) {
+        return;
+      }
       synthesizerString = this.synthesizer.strings[string];
       if (fret !== this.currentFret || string !== this.currentString) {
         _ref2 = [fret, string], this.currentFret = _ref2[0], this.currentString = _ref2[1];
@@ -412,13 +449,46 @@ return{fragment:e,cacheable:g}},f.fragments={},f.each({appendTo:"append",prepend
     };
     Application.prototype.pick = function(event) {
       var fret, pitch, string, synthesizerString, _ref, _ref2;
-      _ref = [fret, string], this.currentFret = _ref[0], this.currentString = _ref[1];
-      _ref2 = this.getfretAndString(event), fret = _ref2[0], string = _ref2[1];
+      _ref = this.getfretAndString(event), fret = _ref[0], string = _ref[1];
+      if (!((fret != null) && (string != null))) {
+        return;
+      }
+      _ref2 = [fret, string], this.currentFret = _ref2[0], this.currentString = _ref2[1];
       synthesizerString = this.synthesizer.strings[string];
       pitch = fret + this.tuning[string];
       synthesizerString.setPitch(pitch);
       synthesizerString.pluck = synthesizerString.L / 2;
       return this.renderer.oscillation[string] = 3 + string * string / 6;
+    };
+    Application.prototype.bend = function(event) {
+      var fret, pitch, string, stringPosition, synthesizerString, x, y, _ref;
+      x = event.pageX - $('#main-canvas').offset().left;
+      y = event.pageY - $('#main-canvas').offset().top;
+      this.bendingString = this.currentString;
+      stringPosition = 20.5 + this.currentString * (this.renderer.canvas.height - 40) / 5;
+      _ref = this.getfretAndString(event), fret = _ref[0], string = _ref[1];
+      if ((this.bendingString != null) && (this.currentFret != null) && (fret != null) && this.currentFret !== fret) {
+        synthesizerString = this.synthesizer.strings[this.bendingString];
+        pitch = fret + this.tuning[this.currentString];
+        synthesizerString.setPitch(pitch);
+      }
+      if (y < stringPosition - 29) {
+        y = stringPosition - 29;
+      }
+      if (y > stringPosition + 29) {
+        y = stringPosition + 29;
+      }
+      if (y < 2) {
+        y = 2;
+      }
+      if (y > this.renderer.canvas.height - 2) {
+        y = this.renderer.canvas.height - 2;
+      }
+      this.bendingCoordinates = [x, y];
+      if (this.bendingString != null) {
+        synthesizerString = this.synthesizer.strings[this.bendingString];
+        return synthesizerString.setBend(Math.abs(y - stringPosition) / 29);
+      }
     };
     Application.prototype.release = function(event) {
       return this.reset();

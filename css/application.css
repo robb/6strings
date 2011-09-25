@@ -89,11 +89,19 @@ input, select {
 body {
   background: url("../img/wood3.png"), url("../img/wood2.png"), url("../img/wood1.png");
   font-family: ff-prater-script-web;
-  color: #68411c;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  color: #895525;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3); }
 
 a {
   color: #68411c; }
+
+p {
+  line-height: 32px; }
 
 h1, h2 {
   font-family: ff-prater-script-web;
@@ -108,14 +116,16 @@ h1 {
     margin: 0 -2px 0 -2px;
     font-size: 60%; }
 
-header, section, footer {
-  padding: 32px; }
+header {
+  padding: 32px 16px; }
+
+section, footer {
+  padding: 16px; }
 
 header {
   position: relative; }
 
 footer {
-  color: #895525;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3); }
 
 .neck {
@@ -128,11 +138,6 @@ footer {
 
 .switch {
   cursor: pointer;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -o-user-select: none;
-  user-select: none;
   display: inline-block; }
   .switch span:first-child {
     border-radius: 8px 0 0 8px;
