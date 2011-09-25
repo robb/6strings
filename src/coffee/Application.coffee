@@ -69,6 +69,10 @@ class Application
   # Actions
   reset: ->
     [@currentFret, @currentString] = [null, null]
+
+    synthesizerString = @synthesizer.strings[@bendingString]
+    synthesizerString.setBend 0
+
     @bendingString = null
 
   strum: (event) ->
@@ -113,12 +117,22 @@ class Application
     @bendingString = @currentString
     stringPosition = 20.5 + @currentString * (@renderer.canvas.height - 40) / 5
 
+    [fret, string] = @getfretAndString event
+    if @bendingString? and @currentFret? and fret? and @currentFret isnt fret
+      synthesizerString = @synthesizer.strings[@bendingString]
+      pitch = fret + @tuning[@currentString]
+      synthesizerString.setPitch pitch
+
     y = stringPosition - 29 if y < stringPosition - 29
     y = stringPosition + 29 if y > stringPosition + 29
     y = 2 if y < 2
     y = @renderer.canvas.height - 2 if y > @renderer.canvas.height - 2
 
     @bendingCoordinates = [x, y]
+
+    if @bendingString?
+      synthesizerString = @synthesizer.strings[@bendingString]
+      synthesizerString.setBend Math.abs(y - stringPosition) / 29
 
   release: (event) ->
     @reset()

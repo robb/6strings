@@ -37,15 +37,26 @@ class Synthesizer
 
 class Synthesizer.String
   constructor: (pitch = 12) ->
-    @setPitch pitch
+    @pitch = 0
+    @bend  = 0
 
     @lowpass   = new Lowpass
     @pluck     = 0
     @n         = 0
 
-  setPitch: (pitch) ->
+    @setPitch 12
+    @setBend  0
+
+  setPitch: (@pitch) ->
+    @updateFrequency()
+
+  setBend: (@bend) ->
+    @updateFrequency()
+
+  updateFrequency: ->
     # Determine the desired fundamental frequency of the string.
     # Assuming equal temper, concert pitch of 440 Hz.
+    pitch = @pitch + @bend
     Hz = 55.0 * Math.pow(2, pitch / 12)
 
     # Since we know the samplerate, we can calculate the desired closed-
