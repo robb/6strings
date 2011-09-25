@@ -4,12 +4,17 @@ class Application
 
     @tuning = [36, 31, 27, 22, 17, 12]
     @chords = [
-      ['G' , 3, 0, 0, 0, 2, 3],
-      ['Em', 0, 0, 0, 2, 2, 0],
-      ['C' , 0, 1, 0, 2, 3, 0],
-      ['Am', 0, 1, 2, 2, 0, 0],
-      ['D' , 2, 3, 2, 0, 0, 0],
-      ['G2' , 2, 2, 3, 4, 4, 2]
+      ['C' ,     0, 1, 0, 2, 3, 0],
+      ['Am',     0, 1, 2, 2, 0, 0],
+      ['G' ,     3, 0, 0, 0, 2, 3],
+      ['Em',     0, 0, 0, 2, 2, 0],
+      ['D' ,     2, 3, 2, 0, 0, 0],
+      ['Bm',     2, 3, 4, 4, 2, 2],
+      ['A',      0, 2, 2, 2, 0, 0],
+      ['F#m',    2, 2, 2, 4, 4, 2],
+      ['E',      0, 0, 1, 2, 2, 0],
+      ['C#m',    NaN, 5, 6, 6, 4, NaN],
+      ['B',      2, 2, 4, 4, 4, 2],
     ]
 
     @synthesizer = new Synthesizer
@@ -33,6 +38,7 @@ class Application
         return if $('#notes').hasClass 'active'
 
         $('#notes-or-chords .label').toggleClass 'active'
+        $('body').removeClass().addClass 'notes'
         @mode = 'notes'
         @reset()
 
@@ -40,6 +46,7 @@ class Application
         return if $('#chords').hasClass 'active'
 
         $('#notes-or-chords .label').toggleClass 'active'
+        $('body').removeClass().addClass 'chords'
         @mode = 'chords'
         @reset()
 
@@ -71,15 +78,12 @@ class Application
     [@currentFret, @currentString] = [null, null]
 
     synthesizerString = @synthesizer.strings[@bendingString]
-    synthesizerString.setBend 0
+    synthesizerString?.setBend 0
 
     @bendingString = null
 
   strum: (event) ->
     [fret, string] = @getfretAndString event
-    
-    console.log fret, string
-
     return unless fret? and string?
 
     synthesizerString = @synthesizer.strings[string]
@@ -122,6 +126,7 @@ class Application
       synthesizerString = @synthesizer.strings[@bendingString]
       pitch = fret + @tuning[@currentString]
       synthesizerString.setPitch pitch
+      @currentFret = fret
 
     y = stringPosition - 29 if y < stringPosition - 29
     y = stringPosition + 29 if y > stringPosition + 29
@@ -130,9 +135,9 @@ class Application
 
     @bendingCoordinates = [x, y]
 
-    if @bendingString?
+    if @bendingString
       synthesizerString = @synthesizer.strings[@bendingString]
-      synthesizerString.setBend Math.abs(y - stringPosition) / 29
+      synthesizerString?.setBend Math.abs(y - stringPosition) / 29
 
   release: (event) ->
     @reset()
