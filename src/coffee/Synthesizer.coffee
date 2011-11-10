@@ -53,6 +53,8 @@ class Synthesizer.String
   setBend: (@bend) ->
     @updateFrequency()
 
+  # Karplus-Strong implementation modeled after
+  # http://kmt.hku.nl/~pieter/EDU/c/pa_karplus-strong.c
   updateFrequency: ->
     # Determine the desired fundamental frequency of the string.
     # Assuming equal temper, concert pitch of 440 Hz.
